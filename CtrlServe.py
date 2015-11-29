@@ -11,12 +11,12 @@ current_vars = {"this": "{this}"}
 
 def chunkify(msg):
     chunks = []
-    not_sent_yet = msg
-    while len(not_sent_yet) >= 64:
-        current_chunk = not_sent_yet[:64]
+    not_sent_yet = msg.encode("UTF-8")
+    while len(not_sent_yet) >= 8:
+        current_chunk = not_sent_yet[:8]
         chunks.append(current_chunk)
-        not_sent_yet = not_sent_yet[64:]
-    chunks.append(not_sent_yet + "\n" + " "*(64-(len(not_sent_yet)+1)))
+        not_sent_yet = not_sent_yet[8:]
+    chunks.append(not_sent_yet + b"\n" + b" "*(7-(len(not_sent_yet)+1)))
     return chunks
 
 
@@ -25,6 +25,7 @@ def send(msg, to=socket.gethostname()):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((to, 0x7079))
         for i in chunkify(msg):
+            print(i)
             sock.send(i)
         return handle((to, 0x7079), sock, True)
     except Exception as e:
@@ -45,22 +46,23 @@ def execute(cmd):
 @server.use
 def handle(addr, sock, answer=False):
     times = 0
+    print("Yay!")
     while (not answer) or times < 1:
-        times = 1
         chunks = []
-        chunk = sock.recv(64)
+        chunk = sock.recv(8)
         chunks.append(chunk)
         if "\n" in chunk:
-            msg = "".join(chunks).split("\n")[0]
+            times = 1
+            msg = b"".join(chunks).decode("UTF-8").split("\n")[0]
             rmsg = msg.format(**current_vars)
             if answer:
                 return rmsg
             else:
                 if rmsg.startswith("{this}:"):
-                    cmd = rmsg[len("{this}:"):]
-                    sock.send(execute(cmd))
+                    cmd = rmsg[len("{this}: "):]
+                    sock.send(execute(cmd).encode("UTF-8"))
                 elif rmsg.startswith(" "):
                     cmd = rmsg[len(" "):]
-                    sock.send(execute(cmd))
+                    sock.send(execute(cmd).encode("UTF-8"))
                 else:
-                    sock.send(send(":".join(rmsg.split(":")[1:]), to=rmsg.split(":")[0]))
+                    sock.send(send(":".join(rmsg.split(":")[1:]), to=rmsg.split(":")[0]).encode("UTF-8"))
