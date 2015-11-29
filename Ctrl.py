@@ -5,7 +5,9 @@ while True:
     answer = CtrlServe.send(cmd)
     if answer.startswith("ERR"):
         print(
-            "</!\\ An exception occured while "+{"ERR@SND": "sending", "ERR@CMD": "executing"}[answer]+" your command."
+            "</!\\ An exception occured while " +
+            {"ERR@SND": "sending", "ERR@CMD": "executing"}[answer.split(" ")[0]] +
+            " your command."
         )
     else:
         print("< Command accepted and executed")
