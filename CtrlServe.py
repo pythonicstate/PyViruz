@@ -16,23 +16,26 @@ def chunkify(msg):
     return chunks
 
 
-def send(msg, to):
+def send(msg, to=socket.gethostname()):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((to, 0x7079))
         for i in chunkify(msg):
             sock.send(i)
         return handle((to, 0x7079), sock, True)
-    except:
-        return "ERR@SND"
+    except Exception as e:
+        return "ERR@SND " + str(e)
 
 
 def execute(cmd):
-    commands = {}
+    commands = {"say_hello": lambda args: "Hello! I like people liking the Pythonic State and Python."}
     if cmd.split(" ")[0] in commands.keys():
-        return "SUCCESS "+commands[cmd.split(" ")[0]](cmd.split(" ")[1:])
+        try:
+            return "SUCCESS "+commands[cmd.split(" ")[0]](cmd.split(" ")[1:])
+        except Exception as e:
+            return "ERR@CMD "+str(e)
     else:
-        return "ERR@CMD"
+        return "ERR@CMD Command not found"
 
 
 @server.use
