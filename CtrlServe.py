@@ -1,7 +1,11 @@
 import PSServe
 import socket
 
-server = PSServe.Server(0x7079)
+if __name__ == "__main__":
+    server = PSServe.Server(0x7079)
+else:
+    server = PSServe.EmptyServer()
+
 current_vars = {"this": "{this}"}
 
 

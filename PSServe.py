@@ -16,3 +16,11 @@ class Server(object):
     def use(self, handler):
         self.handler = handler
         return handler
+
+
+class EmptyServer(object):
+    def __init__(self):
+        pass
+
+    def use(self, handler):
+        return handler
