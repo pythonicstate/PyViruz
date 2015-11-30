@@ -9,6 +9,24 @@ else:
 current_vars = {"this": "{this}"}
 
 
+class SocketImitation(object):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def send(self, msg):
+        self.msg += msg
+
+    def recv(self, l=-1):
+        if l == -1:
+            r = self.msg
+            self.msg = ""
+            return r
+        else:
+            r = self.msg[:l]
+            self.msg = self.msg[l:]
+            return r
+
+
 def chunkify(msg):
     chunks = []
     not_sent_yet = msg.encode("UTF-8")
@@ -20,7 +38,9 @@ def chunkify(msg):
     return chunks
 
 
-def send(msg, to=socket.gethostname()):
+def send(msg, to=None):
+    if to is None:
+        return handle(None, SocketImitation(msg), False)
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((to, 0x7079))
